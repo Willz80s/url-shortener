@@ -2,13 +2,20 @@ const express = require('express');
 const app = express();
 const PORT = 4000;
 
-app.use(express.json()); // needed for POST /register
+app.use(express.json());
 
-// In-memory store for ID → URL
+// In-memory store
 const urlStore = {};
 
 // ===============================
-// 1) Register new shortened URLs
+// DEBUG ENDPOINT (MUST COME FIRST)
+// ===============================
+app.get('/debug', (req, res) => {
+  res.json(urlStore);
+});
+
+// ===============================
+// Register new URLs
 // ===============================
 app.post('/register', (req, res) => {
   const { id, url } = req.body;
@@ -18,14 +25,13 @@ app.post('/register', (req, res) => {
   }
 
   urlStore[id] = url;
-
   console.log(`[redirect-service] Registered: ${id} → ${url}`);
 
   res.json({ message: "Registered successfully" });
 });
 
 // ===============================
-// 2) Handle redirect requests
+// Redirect handler — must be LAST
 // ===============================
 app.get('/:id', (req, res) => {
   const id = req.params.id;
@@ -40,14 +46,9 @@ app.get('/:id', (req, res) => {
   }
 
   console.log(`[redirect-service] Found URL: ${url}`);
-  console.log(`[redirect-service] Redirecting user → ${url}`);
-
   return res.redirect(url);
 });
 
-// ===============================
-// 3) Start server
-// ===============================
 app.listen(PORT, () =>
   console.log(`[redirect-service] Running on port ${PORT}`)
 );
