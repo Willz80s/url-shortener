@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShortPro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <h1 class="title">ShortPro</h1>
+        <p class="subtitle">Shorten URLs instantly. Just paste your long URL and we’ll generate a unique shortened one for you!</p>
+
+        <div class="card">
+            <input type="text" id="longUrl" placeholder="Enter your long URL here">
+            <button id="shortenBtn">
+                <span class="btn-text">Shorten URL</span>
+                <span class="loader hidden"></span>
+            </button>
+        </div>
+
+        <div id="result" class="result hidden">
+            <p>Your shortened URL:</p>
+            <div class="short-url-box">
+                <span id="shortUrl"></span>
+                <button id="copyBtn">Copy</button>
+            </div>
+            <small id="copyMsg" class="copy-msg"></small>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

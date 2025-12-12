@@ -1,0 +1,135 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #4f46e5, #9333ea);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.container {
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+}
+
+.title {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.subtitle {
+    margin-top: -10px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.card {
+    background: #ffffff10;
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(8px);
+    border: 1px solid #ffffff30;
+    display: flex;
+    gap: 10px;
+}
+
+.card input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+}
+
+.card button {
+    background: #22c55e;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    transition: 0.2s;
+    position: relative;
+    width: 140px;
+}
+
+.card button:hover {
+    background: #16a34a;
+}
+
+.loader {
+    width: 18px;
+    height: 18px;
+    border: 3px solid transparent;
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.result {
+    margin-top: 20px;
+    text-align: left;
+    animation: fadeIn 0.4s ease;
+}
+
+.short-url-box {
+    background: #ffffff15;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ffffff30;
+}
+
+.short-url-box button {
+    background: #3b82f6;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+}
+
+.short-url-box button:hover {
+    background: #2563eb;
+}
+
+.copy-msg {
+    margin-top: 8px;
+    color: #bbf7d0;
+}
+
+.error-msg {
+    color: #ffe4e6;
+    background: #be123c50;
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}

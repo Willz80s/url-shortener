@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/Willz80s/url-shortener#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "nanoid": "^5.1.6"
   }
 }
