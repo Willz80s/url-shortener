@@ -72,7 +72,22 @@ app.post("/api/shorten", async (req, res) => {
 app.get("/api/debug", (req, res) => {
   res.json(urlStore);
 });
+// ===============================
+// 3) Get analytics for a short URL
+// ===============================
+app.get("/api/stats/:id", async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    const response = await axios.get(
+      `http://localhost:6000/stats/${id}`
+    );
+    res.json(response.data);
+  } catch (err) {
+    console.error("[api-service] Failed to fetch analytics", err.message);
+    res.status(500).json({ error: "Failed to fetch analytics" });
+  }
+});
 // ===============================
 // Start server
 // ===============================

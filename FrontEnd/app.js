@@ -1,80 +1,111 @@
-const apiURL = "http://localhost:3001/api/shorten";
+const shortenBtn = document.getElementById("shortenBtn");
+const copyBtn = document.getElementById("copyBtn");
 
-document.getElementById("shortenBtn").addEventListener("click", async () => {
-    const input = document.getElementById("longUrl");
-    const longUrl = input.value.trim();
+const longUrlInput = document.getElementById("longUrl");
+const shortUrlEl = document.getElementById("shortUrl");
+const resultBox = document.getElementById("result");
+const copyMsg = document.getElementById("copyMsg");
 
-    const btn = document.getElementById("shortenBtn");
-    const btnText = btn.querySelector(".btn-text");
-    const loader = btn.querySelector(".loader");
+let currentId = null;
+let statsInterval = null;
 
-    const resultBox = document.getElementById("result");
-    const output = document.getElementById("shortUrl");
-    const copyMsg = document.getElementById("copyMsg");
+// ===============================
+// Shorten URL
+// ===============================
+shortenBtn.addEventListener("click", async () => {
+  const longUrl = longUrlInput.value.trim();
 
-    // Reset UI
-    resultBox.classList.add("hidden");
-    copyMsg.textContent = "";
+  if (!longUrl) {
+    alert("Please enter a URL");
+    return;
+  }
 
-    if (!longUrl) {
-        showError("Please enter a URL");
-        return;
+  shortenBtn.disabled = true;
+  shortenBtn.textContent = "Shortening...";
+
+  try {
+    const response = await fetch("http://localhost:3001/api/shorten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: longUrl })
+    });
+
+    const data = await response.json();
+
+    if (!data.shortUrl || !data.id) {
+      throw new Error("Invalid response");
     }
 
-    // Start loading
-    btnText.classList.add("hidden");
-    loader.classList.remove("hidden");
+    shortUrlEl.textContent = data.shortUrl;
+    resultBox.classList.remove("hidden");
+    currentId = data.id;
 
-    try {
-        const response = await fetch(apiURL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: longUrl })
-        });
+    // Fetch stats immediately
+    fetchStats();
 
-        const data = await response.json();
+    // Start auto-refresh (every 5s)
+    if (statsInterval) clearInterval(statsInterval);
+    statsInterval = setInterval(fetchStats, 5000);
 
-        if (data.shortUrl) {
-            output.textContent = data.shortUrl;
-            resultBox.classList.remove("hidden");
-
-            // Auto-open in new tab
-            // window.open(data.shortUrl, "_blank");
-        } else {
-            showError("Server did not return a short URL.");
-        }
-    } catch (error) {
-        showError("Unable to reach backend. Check if api-service is running.");
-        console.error(error);
-    }
-
-    // Stop loading
-    btnText.classList.remove("hidden");
-    loader.classList.add("hidden");
+  } catch (err) {
+    alert("Failed to shorten URL");
+    console.error(err);
+  } finally {
+    shortenBtn.disabled = false;
+    shortenBtn.textContent = "Shorten URL";
+  }
 });
 
-document.getElementById("copyBtn").addEventListener("click", async () => {
-    const text = document.getElementById("shortUrl").textContent;
-    const msg = document.getElementById("copyMsg");
+// ===============================
+// Fetch analytics stats
+// ===============================
+async function fetchStats() {
+  if (!currentId) return;
 
-    try {
-        await navigator.clipboard.writeText(text);
-        msg.textContent = "Copied!";
-        setTimeout(() => (msg.textContent = ""), 1500);
-    } catch (err) {
-        msg.textContent = "Failed to copy";
-    }
-});
-
-function showError(msg) {
-    const old = document.querySelector(".error-msg");
-    if (old) old.remove();
-
-    const div = document.createElement("div");
-    div.className = "error-msg";
-    div.textContent = msg;
-
-    document.querySelector(".container").appendChild(div);
-
-    setTimeout(() => div.remove(), 3000);
+  try {
+    const res = await fetch(
+      `http://localhost:3001/api/stats/${currentId}`
+    );
+    const stats = await res.json();
+    showStats(stats.clicks);
+  } catch (err) {
+    console.error("Failed to fetch stats");
+  }
 }
+
+// ===============================
+// Display analytics
+// ===============================
+function showStats(clicks) {
+  let statsEl = document.getElementById("stats");
+
+  if (!statsEl) {
+    statsEl = document.createElement("p");
+    statsEl.id = "stats";
+    statsEl.style.marginTop = "10px";
+    statsEl.style.opacity = "0.9";
+    resultBox.appendChild(statsEl);
+  }
+
+  statsEl.textContent = `Total clicks: ${clicks}`;
+}
+
+// ===============================
+// Copy shortened URL
+// ===============================
+copyBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(shortUrlEl.textContent);
+    copyMsg.textContent = "Copied!";
+    setTimeout(() => (copyMsg.textContent = ""), 1500);
+  } catch {
+    alert("Copy failed");
+  }
+});
+
+// ===============================
+// Cleanup on page unload
+// ===============================
+window.addEventListener("beforeunload", () => {
+  if (statsInterval) clearInterval(statsInterval);
+});
