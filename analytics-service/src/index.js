@@ -1,75 +1,63 @@
-// ===============================
-// analytics-service/index.js
-// Analytics Tracking Service
-// ===============================
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
-const express = require('express');
-const cors = require('cors');
-
-// Initialize app
 const app = express();
+const PORT = 6000;
 
-// Load environment variables
-require('dotenv').config();
-const PORT = process.env.PORT || 3003;
-
-// In-memory analytics store
-let events = {};
-
-// Middleware
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-// -------------------------------
-// Logging middleware
-// -------------------------------
-app.use((req, res, next) => {
-  console.log(`[analytics-service] ${req.method} ${req.url}`);
-  next();
+// In-memory analytics store: { shortId: [ events ] }
+const analyticsStore = {};
+// ===============================
+// 1) TRACK CLICK EVENTS
+// ===============================
+app.post("/track", (req, res) => {
+    const { id, userAgent, ip } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: "Short URL ID is required" });
+    }
+
+    if (!analyticsStore[id]) {
+        analyticsStore[id] = [];
+    }
+
+    analyticsStore[id].push({
+        timestamp: new Date().toISOString(),
+        userAgent,
+        ip
+    });
+
+    console.log(`[analytics-service] Tracked click for ID: ${id}`);
+    res.json({ message: "Analytics recorded" });
 });
 
-// -------------------------------
-// Route: Track Click Event
-// POST /track
-// -------------------------------
-app.post('/track', (req, res) => {
-  const { id, userAgent, referrer } = req.body;
+// ===============================
+// 2) GET ANALYTICS FOR SPECIFIC ID
+// ===============================
+app.get("/stats/:id", (req, res) => {
+    const id = req.params.id;
+    const stats = analyticsStore[id] || [];
 
-  console.log(`[analytics-service] Tracking event for: ${id}`);
-
-  if (!events[id]) {
-    events[id] = [];
-  }
-
-  events[id].push({
-    id,
-    userAgent,
-    referrer,
-    timestamp: Date.now()
-  });
-
-  return res.json({ success: true });
+    res.json({
+        id,
+        clicks: stats.length,
+        events: stats
+    });
 });
 
-// -------------------------------
-// Route: Stats for an ID
-// GET /stats/:id
-// -------------------------------
-app.get('/stats/:id', (req, res) => {
-  const { id } = req.params;
-
-  console.log(`[analytics-service] Fetching stats for: ${id}`);
-
-  return res.json({
-    id,
-    count: events[id] ? events[id].length : 0,
-    events: events[id] || []
-  });
+// ===============================
+// 3) HEALTH CHECK
+// ===============================
+app.get("/", (req, res) => {
+    res.send("Analytics service is running");
 });
 
-// -------------------------------
-// Start Server
-// -------------------------------
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[analytics-service] Running on port ${PORT}`);
+// ===============================
+// START SERVER
+// ===============================
+app.listen(PORT, () => {
+    console.log(`[analytics-service] Running on port ${PORT}`);
 });
